@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,48 +13,58 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.IO;
 
-namespace IskolaWPF
+namespace BalatonWPF
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
+        List<adatok> lista = new List<adatok>();
         public MainWindow()
         {
             InitializeComponent();
-            StreamReader sr = new StreamReader("nevek.txt");
+            combobox1.Items.Add("A");
+            combobox1.Items.Add("B");
+            combobox1.Items.Add("C");
+
+            StreamReader sr = new StreamReader("utca.txt");
+            sr.ReadLine();
             while (!sr.EndOfStream)
             {
-                listbox1.Items.Add(sr.ReadLine());
+                string sor = sr.ReadLine();
+                adatok a = new adatok(sor);
+                lista.Add(a);
             }
 
-            sr.Close();
+            datagrid1.ItemsSource = lista;
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void modosit_Click(object sender, RoutedEventArgs e)
         {
-            try
+            int db = 0;
+            foreach (var item in lista)
             {
-                listbox1.Items.RemoveAt(listbox1.SelectedIndex);
+                if (db==datagrid1.SelectedIndex)
+                {
+                    item.Kategoria = combobox1.Text;
+                }
+                db++;
             }
-            catch (Exception)
-            {
-                MessageBox.Show("Nem jelölt ki tanulót!");
-            }
+            datagrid1.Items.Refresh();
         }
 
         private void mentes_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                StreamWriter sw = new StreamWriter("nevekNEW.txt");
-                for (int i = 0; i < listbox1.Items.Count; i++)
+                StreamWriter sw = new StreamWriter("modositottadok.txt");
+                foreach (var item in lista)
                 {
-                    sw.WriteLine(listbox1.Items[i].ToString());
+                    sw.WriteLine(item.Adoszam + " " + item.Utca + " " + item.Hazszam + " " + item.Kategoria + " " + item.Terulet);
                 }
+                MessageBox.Show("A mentés sikeres!");
                 sw.Close();
             }
             catch (Exception ex)
